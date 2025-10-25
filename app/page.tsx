@@ -1,83 +1,107 @@
 'use client';
-import { DarkThemeToggle } from 'flowbite-react';
-import Image from 'next/image';
+import { ReactElement } from 'react';
 import { usePlayer } from './hooks/players/usePlayer';
-import { PlayersList } from './components/PlayerCard';
+import { useTeam } from './hooks/teams/useTeam';
 import { ToastContainer } from './components/ToastContainer';
-import type { Player } from './interfaces/server';
+import { DashboardTabs } from './components/DashboardTabs';
+import { SwitchDarkMode } from '@/app/components/SwitchDarkMode/SwitchDarkMode';
 
-export default function Home() {
-  const { players, loading, error, getPlayers, toasts, removeToast } = usePlayer();
+// Type definitions for the Home component
+type ShowToastFunction = (
+  _type: 'success' | 'error' | 'warning' | 'info',
+  _message: string,
+  _duration?: number
+) => void;
 
-  const handlePlayerClick = (player: Player) => {
-    // Handle player card click - you can add navigation or modal logic here
-    console.log('Player clicked:', player);
+type RemoveToastFunction = (_id: string) => void;
+type HandlePlayerCreatedFunction = () => Promise<void>;
+type HandleTeamCreatedFunction = () => Promise<void>;
+type HandleRetryFunction = () => void;
+
+export default function Home(): ReactElement {
+  const {
+    players,
+    loading: playersLoading,
+    error: playersError,
+    getPlayers,
+    toasts: playerToasts,
+    removeToast: removePlayerToast,
+    showToast: showPlayerToast
+  } = usePlayer();
+
+  const {
+    teams,
+    loading: teamsLoading,
+    error: teamsError,
+    getTeams,
+    toasts: teamToasts,
+    removeToast: removeTeamToast
+  } = useTeam();
+
+  // Combine toasts from both hooks
+  const allToasts: any[] = [...playerToasts, ...teamToasts];
+
+  // Combined loading state
+  const loading: boolean = playersLoading || teamsLoading;
+
+  // Combined error state
+  const error: string | null = playersError || teamsError;
+
+  // Universal toast function that uses player toast system as primary
+  const showToast: ShowToastFunction = (
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string,
+    duration?: number
+  ): void => {
+    showPlayerToast(type, message, duration);
+  };
+
+  // Universal toast removal function
+  const removeToast: RemoveToastFunction = (id: string): void => {
+    removePlayerToast(id);
+    removeTeamToast(id);
+  };
+
+  const handlePlayerCreated: HandlePlayerCreatedFunction =
+    async (): Promise<void> => {
+      await getPlayers();
+    };
+
+  const handleTeamCreated: HandleTeamCreatedFunction =
+    async (): Promise<void> => {
+      await getTeams();
+    };
+
+  const handleRetry: HandleRetryFunction = (): void => {
+    getPlayers();
+    getTeams();
   };
 
   return (
-    <main className='flex min-h-screen flex-col items-center justify-center bg-white px-4 py-24 dark:bg-gray-900'>
-      <div className='absolute inset-0 size-full'>
-        <div className='relative h-full w-full select-none'>
-          <Image
-            className='absolute right-0 min-w-dvh dark:hidden'
-            alt='Pattern Light'
-            src='/pattern-light.svg'
-            width='803'
-            height='774'
-          />
-          <Image
-            className='absolute right-0 hidden min-w-dvh dark:block'
-            alt='Pattern Dark'
-            src='/pattern-dark.svg'
-            width='803'
-            height='775'
-          />
-        </div>
-      </div>
-      <div className='absolute top-4 right-4'>
-        <DarkThemeToggle />
-      </div>
-
-      <div className='relative flex w-full max-w-5xl flex-col items-center justify-center gap-12'>
+    <main className='flex min-h-screen flex-col items-center bg-white px-4 py-8 dark:bg-gray-900'>
+      <SwitchDarkMode />
+      <div className='relative flex w-full max-w-5xl flex-col items-center gap-4'>
         <div className='relative flex flex-col items-center gap-6'>
           <h1 className='relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200'>
-            Players Dashboard
+            Sports Management Dashboard
           </h1>
-          <span className='inline-flex flex-wrap items-center justify-center gap-2.5 text-center'>
-            <span className='inline text-xl text-gray-600 dark:text-gray-400'>
-              Manage your team players with
-            </span>
-            <span className='relative inline-flex items-center gap-2'>
-              <Image
-                className='size-6'
-                alt='Flowbite React logo'
-                src='/flowbite-react.svg'
-                width={24}
-                height={24}
-              />
-              <span className='relative w-fit text-xl font-semibold whitespace-nowrap text-[#111928] dark:text-white'>
-                Flowbite React
-              </span>
-            </span>
-            <h2 className='inline text-xl text-gray-600 dark:text-gray-400'>
-              dashboard.
-            </h2>
-          </span>
         </div>
 
-        <div className='relative flex w-full flex-col items-start gap-6 self-stretch'>
-          <PlayersList
+        <div className='relative flex w-full flex-col items-center gap-4 self-stretch'>
+          <DashboardTabs
             players={players}
+            teams={teams}
             loading={loading}
             error={error}
-            onRetry={getPlayers}
-            onPlayerClick={handlePlayerClick}
+            onRetry={handleRetry}
+            onPlayerCreated={handlePlayerCreated}
+            onTeamCreated={handleTeamCreated}
+            showToast={showToast}
           />
         </div>
       </div>
 
-      {/* Toast Container for notifications */}
-      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+      <ToastContainer toasts={allToasts} onRemoveToast={removeToast} />
     </main>
   );
 }

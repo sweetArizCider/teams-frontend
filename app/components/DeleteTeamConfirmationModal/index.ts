@@ -1,0 +1,1 @@
+export { DeleteTeamConfirmationModal } from './DeleteTeamConfirmationModal';

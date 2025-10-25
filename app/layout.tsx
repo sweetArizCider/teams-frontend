@@ -1,10 +1,11 @@
-import { ThemeModeScript } from 'flowbite-react';
+import { ThemeModeScript, ThemeProvider } from 'flowbite-react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ThemeInit } from '@/.flowbite-react/init';
 import './globals.css';
 import React, { ReactElement } from 'react';
 import { NextFontWithVariable } from 'next/dist/compiled/@next/font';
+import { customTheme } from './customTheme';
 
 const geistSans: NextFontWithVariable = Geist({
   variable: '--font-geist-sans',
@@ -35,7 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeInit />
-        {children}
+        <ThemeProvider theme={customTheme}>{children}</ThemeProvider>
       </body>
     </html>
   );

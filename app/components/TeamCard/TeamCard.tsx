@@ -1,48 +1,37 @@
 import React, { ReactElement } from 'react';
-import type { Player } from '../../interfaces/server';
-import { PlayerIcon } from './PlayerIcon';
+import type { Team } from '../../interfaces/server';
+import { TeamIcon } from './TeamIcon';
 
-interface PlayerCardProps {
-  player: Player;
-  onClick?: (_player: Player) => void;
+interface TeamCardProps {
+  team: Team;
+  onClick?: (_team: Team) => void;
 }
 
-interface GetPlayerDetailsFunction {
-  (_player: Player): string;
+interface GetTeamDetailsFunction {
+  (_team: Team): string;
 }
 
 type HandleClickFunction = () => void;
-type PlayerCardComponent = React.FC<PlayerCardProps>;
+type TeamCardComponent = React.FC<TeamCardProps>;
 
-export const PlayerCard: PlayerCardComponent = (
-  props: PlayerCardProps
+export const TeamCard: TeamCardComponent = (
+  props: TeamCardProps
 ): ReactElement => {
-  const { player, onClick }: PlayerCardProps = props;
+  const { team, onClick } = props;
 
-  const getPlayerDetails: GetPlayerDetailsFunction = (
-    player: Player
-  ): string => {
-    if (player.position && player.nationality) {
-      return `${player.position} • ${player.nationality} • Age ${player.age}`;
-    }
-    if (player.position) {
-      return `${player.position} • Age ${player.age}`;
-    }
-    if (player.nationality) {
-      return `${player.nationality} • Age ${player.age}`;
-    }
-    return `Age ${player.age}`;
+  const getTeamDetails: GetTeamDetailsFunction = (team: Team): string => {
+    return `${team.sport} • ${team.city}`;
   };
 
   const handleClick: HandleClickFunction = (): void => {
     if (onClick) {
-      onClick(player);
+      onClick(team);
     }
   };
 
   return (
     <div
-      key={player._id || player.name}
+      key={team._id || team.name}
       className='outline-primary-600 dark:outline-primary-500 group hover:border-primary-600 dark:hover:border-primary-500 cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-gray-50 outline-offset-2 focus:outline-2 dark:border-gray-700 dark:bg-gray-800'
       onClick={handleClick}
       role={onClick ? 'button' : undefined}
@@ -50,21 +39,16 @@ export const PlayerCard: PlayerCardComponent = (
       <div className='flex items-center gap-6 p-4'>
         <div className='flex flex-1 items-center gap-2'>
           <div className='size-9'>
-            <PlayerIcon />
+            <TeamIcon />
           </div>
 
           <div className='flex flex-1 flex-col items-start justify-center gap-1.5 border-l border-gray-200 pl-3.5 dark:border-gray-700'>
             <div className='w-full font-sans text-lg leading-4 font-semibold text-gray-900 dark:text-gray-200'>
-              {player.name}
-              {player.number && (
-                <span className='ml-2 text-sm text-blue-600 dark:text-blue-400'>
-                  #{player.number}
-                </span>
-              )}
+              {team.name}
             </div>
 
             <div className='w-full font-sans text-sm leading-5 font-normal text-gray-500 dark:text-gray-400'>
-              {getPlayerDetails(player)}
+              {getTeamDetails(team)}
             </div>
           </div>
         </div>

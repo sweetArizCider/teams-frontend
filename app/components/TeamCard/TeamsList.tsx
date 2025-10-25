@@ -1,58 +1,70 @@
 import React, { ReactElement } from 'react';
 import { Pagination } from 'flowbite-react';
-import type { Player } from '../../interfaces/server';
-import { PlayerCard } from './PlayerCard';
+import type { Team } from '../../interfaces/server';
+import { TeamCard } from './TeamCard';
 import { usePagination } from '../../hooks/usePagination';
 
-interface PlayersListProps {
-  players: Player[];
+interface TeamsListProps {
+  teams: Team[];
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  onPlayerClick?: (_player: Player) => void;
+  onTeamClick?: (_team: Team) => void;
 }
 
-export const PlayersList: React.FC<PlayersListProps> = (
-  props: PlayersListProps
-): ReactElement => {
-  const { players, loading, onPlayerClick } = props;
+type TeamsListComponent = React.FC<TeamsListProps>;
+type OnPageChangeFunction = (_page: number) => void;
 
-  const { currentPage, totalPages, paginatedData, onPageChange } =
-    usePagination({
-      data: players,
-      itemsPerPage: 18
-    });
+export const TeamsList: TeamsListComponent = (
+  props: TeamsListProps
+): ReactElement => {
+  const { teams, loading, onTeamClick }: TeamsListProps = props;
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    onPageChange
+  }: {
+    currentPage: number;
+    totalPages: number;
+    paginatedData: Team[];
+    onPageChange: OnPageChangeFunction;
+  } = usePagination({
+    data: teams,
+    itemsPerPage: 18
+  });
 
   if (loading) {
     return (
       <div className='w-full text-center'>
         <div className='text-lg text-gray-600 dark:text-gray-400'>
-          Loading players...
+          Loading teams...
         </div>
       </div>
     );
   }
 
-  if (players.length === 0 && !loading) {
+  if (teams.length === 0 && !loading) {
     return (
       <div className='w-full text-center'>
         <div className='text-lg text-gray-600 dark:text-gray-400'>
-          No players found
+          No teams found
         </div>
       </div>
     );
   }
 
   return (
-    <div className='w-full flex flex-col min-h-[700px]'>
+    <div className='w-full flex flex-col h-[600px]'>
       <div className='flex-1'>
         <div className='grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {paginatedData.map(
-            (player: Player): Element => (
-              <PlayerCard
-                key={player._id || player.name}
-                player={player}
-                onClick={onPlayerClick}
+            (team: Team): ReactElement => (
+              <TeamCard
+                key={team._id || team.name}
+                team={team}
+                onClick={onTeamClick}
               />
             )
           )}

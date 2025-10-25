@@ -1,0 +1,1 @@
+export { UpdatePlayerModal } from './UpdatePlayerModal';
