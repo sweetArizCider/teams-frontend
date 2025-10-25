@@ -1,0 +1,13 @@
+
+# # dependencies
+# node_modules/
+
+# # builds
+# .next/
+# out/
+# build/
+# dist/
+# coverage/
+
+# # misc
+# public/
