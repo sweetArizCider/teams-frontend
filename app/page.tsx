@@ -2,9 +2,11 @@
 import { ReactElement } from 'react';
 import { usePlayer } from './hooks/players/usePlayer';
 import { useTeam } from './hooks/teams/useTeam';
+import { usePlayerTeam } from './hooks/playersTeam/usePlayerTeam';
 import { ToastContainer } from './components/ToastContainer';
 import { DashboardTabs } from './components/DashboardTabs';
 import { SwitchDarkMode } from '@/app/components/SwitchDarkMode/SwitchDarkMode';
+import { ToastData } from '@/app/hooks/useToast';
 
 // Type definitions for the Home component
 type ShowToastFunction = (
@@ -16,6 +18,7 @@ type ShowToastFunction = (
 type RemoveToastFunction = (_id: string) => void;
 type HandlePlayerCreatedFunction = () => Promise<void>;
 type HandleTeamCreatedFunction = () => Promise<void>;
+type HandlePlayerTeamCreatedFunction = () => Promise<void>;
 type HandleRetryFunction = () => void;
 
 export default function Home(): ReactElement {
@@ -38,16 +41,19 @@ export default function Home(): ReactElement {
     removeToast: removeTeamToast
   } = useTeam();
 
-  // Combine toasts from both hooks
-  const allToasts: any[] = [...playerToasts, ...teamToasts];
+  const {
+    playerTeams,
+    loading: playerTeamsLoading,
+    error: playerTeamsError,
+    getPlayerTeams
+  } = usePlayerTeam();
 
-  // Combined loading state
-  const loading: boolean = playersLoading || teamsLoading;
+  const allToasts: ToastData[] = [...playerToasts, ...teamToasts];
 
-  // Combined error state
-  const error: string | null = playersError || teamsError;
+  const loading: boolean = playersLoading || teamsLoading || playerTeamsLoading;
 
-  // Universal toast function that uses player toast system as primary
+  const error: string | null = playersError || teamsError || playerTeamsError;
+
   const showToast: ShowToastFunction = (
     type: 'success' | 'error' | 'warning' | 'info',
     message: string,
@@ -56,7 +62,6 @@ export default function Home(): ReactElement {
     showPlayerToast(type, message, duration);
   };
 
-  // Universal toast removal function
   const removeToast: RemoveToastFunction = (id: string): void => {
     removePlayerToast(id);
     removeTeamToast(id);
@@ -72,9 +77,15 @@ export default function Home(): ReactElement {
       await getTeams();
     };
 
+  const handlePlayerTeamCreated: HandlePlayerTeamCreatedFunction =
+    async (): Promise<void> => {
+      await getPlayerTeams();
+    };
+
   const handleRetry: HandleRetryFunction = (): void => {
     getPlayers();
     getTeams();
+    getPlayerTeams();
   };
 
   return (
@@ -91,11 +102,13 @@ export default function Home(): ReactElement {
           <DashboardTabs
             players={players}
             teams={teams}
+            playerTeams={playerTeams}
             loading={loading}
             error={error}
             onRetry={handleRetry}
             onPlayerCreated={handlePlayerCreated}
             onTeamCreated={handleTeamCreated}
+            onPlayerTeamCreated={handlePlayerTeamCreated}
             showToast={showToast}
           />
         </div>

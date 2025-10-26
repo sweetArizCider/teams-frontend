@@ -19,7 +19,11 @@ interface CreateTeamModalProps {
   onError?: (_error: string) => void;
 }
 
-export const CreateTeamModal = (props: CreateTeamModalProps): ReactElement => {
+type CreateTeamModalComponent = (_props: CreateTeamModalProps) => ReactElement;
+
+export const CreateTeamModal: CreateTeamModalComponent = (
+  props: CreateTeamModalProps
+): ReactElement => {
   const { isOpen, onClose, onTeamCreated, onError } = props;
   const [formData, setFormData] = useState<CreateTeamRequest>({
     name: '',

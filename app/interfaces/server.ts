@@ -101,8 +101,12 @@ export interface PlayerWithTeamInfo extends Player {
 }
 
 export interface TeamWithPlayersInfo extends Team {
-  players?: PlayerWithTeamInfo[];
-  player_count?: number;
+  players?: PlayerTeam[];
+}
+
+export interface PlayerTeamWithDetails extends PlayerTeam {
+  player?: Player;
+  team?: Team;
 }
 
 // API Response Types
@@ -185,3 +189,20 @@ export enum HttpStatusCode {
   UNPROCESSABLE_ENTITY = 422,
   INTERNAL_SERVER_ERROR = 500
 }
+
+// API URLs
+export const API_URLS = {
+  // Player endpoints
+  PLAYERS: '/players',
+  PLAYER_BY_ID: (id: string) => `/players/${id}`,
+
+  // Team endpoints
+  TEAMS: '/teams',
+  TEAM_BY_ID: (id: string) => `/teams/${id}`,
+
+  // Player-Team endpoints
+  PLAYER_TEAMS: '/players-teams',
+  PLAYER_TEAM_BY_ID: (id: string) => `/players-teams/${id}`,
+  PLAYER_TEAMS_BY_PLAYER: (playerId: string) => `/players-teams/player/${playerId}`,
+  PLAYER_TEAMS_BY_TEAM: (teamId: string) => `/players-teams/team/${teamId}`,
+} as const;

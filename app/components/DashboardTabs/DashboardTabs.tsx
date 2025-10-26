@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useState, type FC } from 'react';
 import { TabItem, Tabs, Button } from 'flowbite-react';
 import { HiUsers, HiUserGroup, HiPlus } from 'react-icons/hi';
 import { MdGroup } from 'react-icons/md';
@@ -8,18 +8,25 @@ import { UpdatePlayerModal } from '../UpdatePlayerModal';
 import { TeamsList } from '../TeamCard';
 import { CreateTeamModal } from '../CreateTeamModal';
 import { UpdateTeamModal } from '../UpdateTeamModal';
-import type { Player, Team } from '../../interfaces/server';
+import { PlayerTeamsList } from '../PlayerTeamCard';
+import { CreatePlayerTeamModal } from '../CreatePlayerTeamModal';
+import { UpdatePlayerTeamModal } from '../UpdatePlayerTeamModal';
+import { DeletePlayerTeamConfirmationModal } from '../DeletePlayerTeamConfirmationModal';
+import type { Player, Team, PlayerTeam } from '../../interfaces/server';
 
 interface DashboardTabsProps {
   players: Player[];
   teams: Team[];
+  playerTeams: PlayerTeam[];
   loading: boolean;
   error: string | null;
   onRetry: () => void;
   onPlayerClick?: (_player: Player) => void;
-  onTeamClick?: (team: Team) => void;
+  onTeamClick?: (_team: Team) => void;
+  onPlayerTeamClick?: (_playerTeam: PlayerTeam) => void;
   onPlayerCreated: (_newPlayer: Player) => Promise<void>;
-  onTeamCreated: (newTeam: Team) => Promise<void>;
+  onTeamCreated: (_newTeam: Team) => Promise<void>;
+  onPlayerTeamCreated: (_newPlayerTeam: PlayerTeam) => Promise<void>;
   showToast: (
     _type: 'success' | 'error' | 'warning' | 'info',
     _message: string,
@@ -27,18 +34,21 @@ interface DashboardTabsProps {
   ) => void;
 }
 
-export const DashboardTabs: React.FC<DashboardTabsProps> = ({
+export const DashboardTabs: FC<DashboardTabsProps> = ({
   players,
   teams,
+  playerTeams,
   loading,
   error,
   onRetry,
   onPlayerClick,
   onTeamClick,
+  onPlayerTeamClick,
   onPlayerCreated,
   onTeamCreated,
+  onPlayerTeamCreated,
   showToast
-}): ReactElement => {
+}: DashboardTabsProps): ReactElement => {
   const [isCreatePlayerModalOpen, setIsCreatePlayerModalOpen] = useState(false);
   const [isUpdatePlayerModalOpen, setIsUpdatePlayerModalOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -46,6 +56,15 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const [isUpdateTeamModalOpen, setIsUpdateTeamModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+
+  const [isCreatePlayerTeamModalOpen, setIsCreatePlayerTeamModalOpen] =
+    useState(false);
+  const [isUpdatePlayerTeamModalOpen, setIsUpdatePlayerTeamModalOpen] =
+    useState(false);
+  const [isDeletePlayerTeamModalOpen, setIsDeletePlayerTeamModalOpen] =
+    useState(false);
+  const [selectedPlayerTeam, setSelectedPlayerTeam] =
+    useState<PlayerTeam | null>(null);
 
   // Player handlers
   const handlePlayerCreatedWithToast = async (
@@ -79,10 +98,6 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
     showToast('error', `Failed to create player: ${error}`, 5000);
   };
 
-  const handlePlayerUpdateError = (error: string): void => {
-    showToast('error', `Failed to update player: ${error}`, 5000);
-  };
-
   const handlePlayerDeleteError = (error: string): void => {
     showToast('error', `Failed to delete player: ${error}`, 5000);
   };
@@ -113,12 +128,36 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
     showToast('error', `Failed to create team: ${error}`, 5000);
   };
 
-  const handleTeamUpdateError = (error: string): void => {
-    showToast('error', `Failed to update team: ${error}`, 5000);
-  };
-
   const handleTeamDeleteError = (error: string): void => {
     showToast('error', `Failed to delete team: ${error}`, 5000);
+  };
+
+  // PlayerTeam handlers
+  const handlePlayerTeamCreatedWithToast = async (
+    newPlayerTeam: PlayerTeam
+  ): Promise<void> => {
+    showToast('success', 'Player Team created successfully!', 3000);
+    await onPlayerTeamCreated(newPlayerTeam);
+  };
+
+  const handlePlayerTeamUpdatedWithToast = async (
+    updatedPlayerTeam: PlayerTeam
+  ): Promise<void> => {
+    showToast('success', 'Player Team updated successfully!', 3000);
+    await onPlayerTeamCreated(updatedPlayerTeam);
+  };
+
+  const handlePlayerTeamDeletedWithToast = async (): Promise<void> => {
+    showToast('success', 'Player Team deleted successfully!', 3000);
+    await onPlayerTeamCreated({} as PlayerTeam);
+  };
+
+  const handlePlayerTeamCreationError = (error: string): void => {
+    showToast('error', `Failed to create player team: ${error}`, 5000);
+  };
+
+  const handlePlayerTeamDeleteError = (error: string): void => {
+    showToast('error', `Failed to delete player team: ${error}`, 5000);
   };
 
   // Click handlers
@@ -134,6 +173,17 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
     onTeamClick?.(team);
   };
 
+  const handlePlayerTeamCardClick = (team: Team): void => {
+    setSelectedTeam(team);
+    setIsUpdatePlayerTeamModalOpen(true);
+    onTeamClick?.(team);
+  };
+
+  const handlePlayerTeamDeleteClick = (team: Team): void => {
+    setSelectedTeam(team);
+    setIsDeletePlayerTeamModalOpen(true);
+  };
+
   // Modal close handlers
   const handleUpdatePlayerModalClose = (): void => {
     setIsUpdatePlayerModalOpen(false);
@@ -143,6 +193,16 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
   const handleUpdateTeamModalClose = (): void => {
     setIsUpdateTeamModalOpen(false);
     setSelectedTeam(null);
+  };
+
+  const handleUpdatePlayerTeamModalClose = (): void => {
+    setIsUpdatePlayerTeamModalOpen(false);
+    setSelectedPlayerTeam(null);
+  };
+
+  const handleDeletePlayerTeamModalClose = (): void => {
+    setIsDeletePlayerTeamModalOpen(false);
+    setSelectedPlayerTeam(null);
   };
 
   return (
@@ -192,11 +252,26 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
           </TabItem>
 
           <TabItem title='Player Teams' icon={HiUserGroup}>
-            <div className='w-full text-center py-12'>
-              <div className='text-lg text-gray-600 dark:text-gray-400'>
-                Player Teams goes here
-              </div>
+            <div className='flex w-full justify-end mb-6'>
+              <Button
+                pill
+                className={'hover:cursor-pointer'}
+                onClick={() => setIsCreatePlayerTeamModalOpen(true)}
+              >
+                <HiPlus className='mr-2 h-5 w-5' />
+                Add Player Team
+              </Button>
             </div>
+
+            <PlayerTeamsList
+              playerTeams={playerTeams}
+              players={players}
+              teams={teams}
+              loading={loading}
+              error={error}
+              onRetry={onRetry}
+              onPlayerTeamClick={handlePlayerTeamCardClick}
+            />
           </TabItem>
         </Tabs>
       </div>
@@ -233,6 +308,38 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
         onTeamUpdated={handleTeamUpdatedWithToast}
         onTeamDeleted={handleTeamDeletedWithToast}
         onError={handleTeamDeleteError}
+      />
+
+      {/* Player Team Modals */}
+      <CreatePlayerTeamModal
+        isOpen={isCreatePlayerTeamModalOpen}
+        onClose={() => setIsCreatePlayerTeamModalOpen(false)}
+        onPlayerTeamCreated={handlePlayerTeamCreatedWithToast}
+        onError={handlePlayerTeamCreationError}
+        teams={teams}
+        players={players}
+      />
+
+      <UpdatePlayerTeamModal
+        isOpen={isUpdatePlayerTeamModalOpen}
+        onClose={handleUpdatePlayerTeamModalClose}
+        selectedTeam={selectedTeam}
+        playerTeams={playerTeams}
+        teams={teams}
+        players={players}
+        onPlayerTeamUpdated={handlePlayerTeamUpdatedWithToast}
+        onError={handlePlayerTeamCreationError}
+        onDeleteClick={handlePlayerTeamDeleteClick}
+      />
+
+      <DeletePlayerTeamConfirmationModal
+        isOpen={isDeletePlayerTeamModalOpen}
+        onClose={handleDeletePlayerTeamModalClose}
+        playerTeam={selectedPlayerTeam}
+        player={players.find((p) => p._id === selectedPlayerTeam?.player_id)}
+        team={teams.find((t) => t._id === selectedPlayerTeam?.team_id)}
+        onPlayerTeamDeleted={handlePlayerTeamDeletedWithToast}
+        onError={handlePlayerTeamDeleteError}
       />
     </>
   );

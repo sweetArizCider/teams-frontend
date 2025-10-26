@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { type ReactElement, type FC } from 'react';
 import { Pagination } from 'flowbite-react';
 import type { Player } from '../../interfaces/server';
 import { PlayerCard } from './PlayerCard';
@@ -12,7 +12,7 @@ interface PlayersListProps {
   onPlayerClick?: (_player: Player) => void;
 }
 
-export const PlayersList: React.FC<PlayersListProps> = (
+export const PlayersList: FC<PlayersListProps> = (
   props: PlayersListProps
 ): ReactElement => {
   const { players, loading, onPlayerClick } = props;
@@ -48,7 +48,7 @@ export const PlayersList: React.FC<PlayersListProps> = (
       <div className='flex-1'>
         <div className='grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
           {paginatedData.map(
-            (player: Player): Element => (
+            (player: Player): ReactElement => (
               <PlayerCard
                 key={player._id || player.name}
                 player={player}

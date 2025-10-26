@@ -21,7 +21,9 @@ interface UseToastReturn {
   clearAllToasts: () => void;
 }
 
-export const useToast = (): UseToastReturn => {
+type UseToastHook = () => UseToastReturn;
+
+export const useToast: UseToastHook = (): UseToastReturn => {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
   const removeToast = useCallback((id: string): void => {
@@ -40,7 +42,6 @@ export const useToast = (): UseToastReturn => {
 
       setToasts((prev) => [...prev, newToast]);
 
-      // Auto remove toast after duration
       if (duration > 0) {
         // eslint-disable-next-line no-undef
         setTimeout(() => {
