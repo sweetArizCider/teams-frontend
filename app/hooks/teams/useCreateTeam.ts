@@ -15,7 +15,9 @@ interface UseCreateTeamReturn {
 }
 
 type UseCreateTeamHook = (_props?: UseCreateTeamProps) => UseCreateTeamReturn;
-type CreateTeamFunction = (_teamData: CreateTeamRequest) => Promise<Team | null>;
+type CreateTeamFunction = (
+  _teamData: CreateTeamRequest
+) => Promise<Team | null>;
 type ResetStateFunction = () => void;
 
 export const useCreateTeam: UseCreateTeamHook = (

@@ -103,7 +103,7 @@ export const CreatePlayerModal = (
               id='name'
               placeholder='Enter player name'
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e): void => handleInputChange('name', e.target.value)}
               required
             />
           </div>
@@ -152,7 +152,9 @@ export const CreatePlayerModal = (
               id='position'
               placeholder='Enter position (e.g., Forward, Midfielder)'
               value={formData.position || ''}
-              onChange={(e) => handleInputChange('position', e.target.value)}
+              onChange={(e): void =>
+                handleInputChange('position', e.target.value)
+              }
             />
           </div>
 
@@ -164,7 +166,9 @@ export const CreatePlayerModal = (
               id='nationality'
               placeholder='Enter nationality'
               value={formData.nationality || ''}
-              onChange={(e) => handleInputChange('nationality', e.target.value)}
+              onChange={(e): void =>
+                handleInputChange('nationality', e.target.value)
+              }
             />
           </div>
 

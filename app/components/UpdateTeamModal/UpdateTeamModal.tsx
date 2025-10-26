@@ -1,5 +1,4 @@
 'use client';
-
 import {
   Button,
   Label,
@@ -8,7 +7,14 @@ import {
   ModalHeader,
   TextInput
 } from 'flowbite-react';
-import { FormEvent, ReactElement, useState, useEffect } from 'react';
+import React, {
+  type FC,
+  FormEvent,
+  ReactElement,
+  useState,
+  useEffect,
+  ChangeEvent
+} from 'react';
 import { HiTrash } from 'react-icons/hi';
 import type { UpdateTeamRequest, Team } from '../../interfaces/server';
 import { useUpdateTeam } from '../../hooks/teams/useUpdateTeam';
@@ -24,14 +30,14 @@ interface UpdateTeamModalProps {
   onError?: (_error: string) => void;
 }
 
-export const UpdateTeamModal: React.FC<UpdateTeamModalProps> = ({
+export const UpdateTeamModal: FC<UpdateTeamModalProps> = ({
   isOpen,
   onClose,
   team,
   onTeamUpdated,
   onTeamDeleted,
   onError
-}): ReactElement => {
+}: UpdateTeamModalProps): ReactElement => {
   const [formData, setFormData] = useState<UpdateTeamRequest>({
     name: '',
     sport: '',
@@ -39,23 +45,22 @@ export const UpdateTeamModal: React.FC<UpdateTeamModalProps> = ({
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { loading, error, updateTeam, resetState } = useUpdateTeam({
-    onSuccess: (updatedTeam) => {
+  const { loading, updateTeam, resetState } = useUpdateTeam({
+    onSuccess: (updatedTeam: Team): void => {
       onTeamUpdated?.(updatedTeam);
       handleClose();
     },
-    onError: (errorMessage) => {
+    onError: (errorMessage: string): void => {
       onError?.(errorMessage);
     }
   });
 
   const {
     loading: deleting,
-    error: deleteError,
     deleteTeam,
     resetState: resetDeleteState
   } = useDeleteTeam({
-    onSuccess: () => {
+    onSuccess: (): void => {
       onTeamDeleted?.();
       handleClose();
     },
@@ -162,7 +167,9 @@ export const UpdateTeamModal: React.FC<UpdateTeamModalProps> = ({
               id='sport'
               placeholder='Enter sport (e.g., Football, Basketball)'
               value={formData.sport || ''}
-              onChange={(e) => handleInputChange('sport', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                handleInputChange('sport', e.target.value)
+              }
               required
             />
           </div>
@@ -175,7 +182,9 @@ export const UpdateTeamModal: React.FC<UpdateTeamModalProps> = ({
               id='city'
               placeholder='Enter city'
               value={formData.city || ''}
-              onChange={(e) => handleInputChange('city', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>): void =>
+                handleInputChange('city', e.target.value)
+              }
               required
             />
           </div>

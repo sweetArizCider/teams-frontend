@@ -19,6 +19,11 @@ interface UsePlayerReturn {
 
 type UsePlayerHook = () => UsePlayerReturn;
 type GetPlayersFunc = () => Promise<void>;
+type ShowToastFunction = (
+  _type: 'success' | 'error' | 'warning' | 'info',
+  _message: string,
+  _duration?: number
+) => string;
 
 export const usePlayer: UsePlayerHook = (): UsePlayerReturn => {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -32,12 +37,12 @@ export const usePlayer: UsePlayerHook = (): UsePlayerReturn => {
   } = useToast();
   const loadingToastRef: RefObject<string | null> = useRef<string | null>(null);
 
-  const showToast: string = (
+  const showToast: ShowToastFunction = (
     type: 'success' | 'error' | 'warning' | 'info',
     message: string,
     duration?: number
   ): string => {
-    const id = `player-toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `player-toast-${Date.now()}-${Math.random().toString()}`;
     showToastFromContext(type, message, duration, id);
     return id;
   };

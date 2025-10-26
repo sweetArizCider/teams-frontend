@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type RefObject } from 'react';
 import type { Team } from '../../interfaces/server';
 import { retrieveAllTeams } from '../../services/teams/team.service';
 import { useToast } from '../useToast';
@@ -35,14 +35,14 @@ export const useTeam: UseTeamHook = (): UseTeamReturn => {
     removeToast,
     clearAllToasts
   } = useToast();
-  const loadingToastRef = useRef<string | null>(null);
+  const loadingToastRef: RefObject<string | null> = useRef<string | null>(null);
 
   const showToast: ShowToastFunction = (
     type: 'success' | 'error' | 'warning' | 'info',
     message: string,
     duration?: number
   ): string => {
-    const id: string = `team-toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const id: string = `team-toast-${Date.now()}-${Math.random().toString()}`;
     showToastFromContext(type, message, duration, id);
     return id;
   };
@@ -50,18 +50,14 @@ export const useTeam: UseTeamHook = (): UseTeamReturn => {
   const getTeams: GetTeamsFunction = async (): Promise<void> => {
     setLoading(true);
     setError(null);
-
-    // Clear any existing toasts first
     clearAllToasts();
 
-    // Show loading toast and store its ID in ref
     loadingToastRef.current = showToast('info', 'Loading teams...', 0);
 
     try {
       const data: Team[] = await retrieveAllTeams();
       setTeams(data);
 
-      // Remove loading toast using the stored ID
       if (loadingToastRef.current) {
         removeToast(loadingToastRef.current);
         loadingToastRef.current = null;
@@ -72,7 +68,6 @@ export const useTeam: UseTeamHook = (): UseTeamReturn => {
         err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
 
-      // Remove loading toast using the stored ID
       if (loadingToastRef.current) {
         removeToast(loadingToastRef.current);
         loadingToastRef.current = null;
