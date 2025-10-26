@@ -1,2 +1,1 @@
 export { CreatePlayerTeamModal } from './CreatePlayerTeamModal';
-

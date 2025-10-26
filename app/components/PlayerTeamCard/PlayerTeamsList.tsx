@@ -49,41 +49,41 @@ interface ApiPlayerTeamResponse {
 export const PlayerTeamsList: React.FC<PlayerTeamsListProps> = (
   props: PlayerTeamsListProps
 ) => {
-  const { playerTeams, players, teams, loading, onPlayerTeamClick } = props;
+  const { playerTeams, teams, loading, onPlayerTeamClick } = props;
 
   // Handle the actual API response structure
   const processPlayerTeams = (): TeamWithPlayerCount[] => {
     const teamMap = new Map<string, TeamWithPlayerCount>();
 
-    // Convert playerTeams to the expected format and group by team
-    (playerTeams as any[]).forEach((pt: ApiPlayerTeamResponse) => {
-      if (pt.team && pt.players && pt.players.object_array) {
-        const teamName = pt.team.name;
-        const playerCount = pt.players.object_array.length;
+    (playerTeams as unknown as ApiPlayerTeamResponse[]).forEach(
+      (pt: ApiPlayerTeamResponse) => {
+        if (pt.team && pt.players && pt.players.object_array) {
+          const teamName = pt.team.name;
+          const playerCount = pt.players.object_array.length;
 
-        // Create a team object that matches our Team interface
-        const team: Team = {
-          _id: pt.team._id || teamName, // Use team name as fallback ID
-          name: pt.team.name,
-          sport: pt.team.sport,
-          city: pt.team.city
-        };
+          const actualTeam = teams.find((t) => t.name === teamName);
 
-        if (teamMap.has(teamName)) {
-          // Add to existing team's player count
-          const existing = teamMap.get(teamName)!;
-          existing.playerCount += playerCount;
-        } else {
-          // Create new team entry
-          teamMap.set(teamName, {
-            team,
-            playerCount
-          });
+          const team: Team = {
+            _id: actualTeam?._id || pt.team._id || teamName,
+            name: pt.team.name,
+            sport: pt.team.sport,
+            city: pt.team.city
+          };
+
+          if (teamMap.has(teamName)) {
+            const existing = teamMap.get(teamName)!;
+            existing.playerCount += playerCount;
+          } else {
+            teamMap.set(teamName, {
+              team,
+              playerCount
+            });
+          }
         }
       }
-    });
+    );
 
-    return Array.from(teamMap.values()).filter(item => item.playerCount > 0);
+    return Array.from(teamMap.values()).filter((item) => item.playerCount > 0);
   };
 
   const teamsWithPlayerCounts = processPlayerTeams();

@@ -16,7 +16,9 @@ interface DeletePlayerTeamConfirmationModalProps {
   onError: (_error: string) => void;
 }
 
-export const DeletePlayerTeamConfirmationModal: React.FC<DeletePlayerTeamConfirmationModalProps> = ({
+export const DeletePlayerTeamConfirmationModal: React.FC<
+  DeletePlayerTeamConfirmationModalProps
+> = ({
   isOpen,
   onClose,
   playerTeam,
@@ -40,7 +42,8 @@ export const DeletePlayerTeamConfirmationModal: React.FC<DeletePlayerTeamConfirm
         onClose();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete player team';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to delete player team';
       onError(errorMessage);
     }
   };
@@ -50,41 +53,42 @@ export const DeletePlayerTeamConfirmationModal: React.FC<DeletePlayerTeamConfirm
   }
 
   return (
-    <Modal show={isOpen} size="md" onClose={onClose} popup>
+    <Modal show={isOpen} size='md' onClose={onClose} popup>
       <ModalHeader />
       <ModalBody>
-        <div className="text-center">
-          <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-          <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+        <div className='text-center'>
+          <HiOutlineExclamationCircle className='mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200' />
+          <h3 className='mb-5 text-lg font-normal text-gray-500 dark:text-gray-400'>
             Are you sure you want to delete this player team relationship?
           </h3>
 
           {player && team && (
-            <div className="mb-5 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                <span className="font-medium">{player.name}</span> from{' '}
-                <span className="font-medium">{team.name}</span>
+            <div className='mb-5 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
+              <p className='text-sm text-gray-600 dark:text-gray-300'>
+                <span className='font-medium'>{player.name}</span> from{' '}
+                <span className='font-medium'>{team.name}</span>
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Position: {playerTeam.position} | Jersey: #{playerTeam.jersey_number}
+              <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                Position: {playerTeam.position} | Jersey: #
+                {playerTeam.jersey_number}
               </p>
             </div>
           )}
 
-          <div className="flex justify-center gap-4">
+          <div className='flex justify-center gap-4'>
             <Button
-              color="red"
+              color='red'
               onClick={handleConfirmDelete}
               disabled={loading}
-              className="hover:cursor-pointer"
+              className='hover:cursor-pointer'
             >
               {loading ? 'Deleting...' : "Yes, I'm sure"}
             </Button>
             <Button
-              color="alternative"
+              color='alternative'
               onClick={onClose}
               disabled={loading}
-              className="hover:cursor-pointer"
+              className='hover:cursor-pointer'
             >
               No, cancel
             </Button>

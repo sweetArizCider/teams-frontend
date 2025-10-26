@@ -8,7 +8,6 @@ import { DashboardTabs } from './components/DashboardTabs';
 import { SwitchDarkMode } from '@/app/components/SwitchDarkMode/SwitchDarkMode';
 import { ToastData } from '@/app/hooks/useToast';
 
-// Type definitions for the Home component
 type ShowToastFunction = (
   _type: 'success' | 'error' | 'warning' | 'info',
   _message: string,

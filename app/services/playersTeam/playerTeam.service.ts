@@ -2,158 +2,195 @@ import type {
   PlayerTeam,
   CreatePlayerTeamRequest,
   UpdatePlayerTeamRequest,
-  CreatePlayerTeamResponse,
-  UpdatePlayerTeamResponse,
-  GetAllPlayerTeamResponse,
-  GetPlayerTeamByIdResponse,
-  DeletePlayerTeamResponse,
-  ValidationError
+  ApiResponse
 } from '../../interfaces/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-
-export class PlayerTeamService {
-  private static instance: PlayerTeamService;
-  private baseUrl: string;
-
-  private constructor() {
-    this.baseUrl = `${API_BASE_URL}/players_team`;
-  }
-
-  static getInstance(): PlayerTeamService {
-    if (!PlayerTeamService.instance) {
-      PlayerTeamService.instance = new PlayerTeamService();
-    }
-    return PlayerTeamService.instance;
-  }
-
-  private async handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  }
-
-  async getAllPlayerTeams(): Promise<PlayerTeam[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await this.handleResponse<GetAllPlayerTeamResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error('Error fetching player teams:', error);
-      throw error;
-    }
-  }
-
-  async getPlayerTeamById(id: string): Promise<PlayerTeam> {
-    try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await this.handleResponse<GetPlayerTeamByIdResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error(`Error fetching player team with ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async createPlayerTeam(playerTeamData: CreatePlayerTeamRequest): Promise<PlayerTeam> {
-    try {
-      const response = await fetch(`${this.baseUrl}/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(playerTeamData),
-      });
-
-      const data = await this.handleResponse<CreatePlayerTeamResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error('Error creating player team:', error);
-      throw error;
-    }
-  }
-
-  async updatePlayerTeam(id: string, playerTeamData: UpdatePlayerTeamRequest): Promise<PlayerTeam> {
-    try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(playerTeamData),
-      });
-
-      const data = await this.handleResponse<UpdatePlayerTeamResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error(`Error updating player team with ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async deletePlayerTeam(id: string): Promise<void> {
-    try {
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      await this.handleResponse<DeletePlayerTeamResponse>(response);
-    } catch (error) {
-      console.error(`Error deleting player team with ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async getPlayerTeamsByTeam(teamId: string): Promise<PlayerTeam[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/team/${teamId}/players`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await this.handleResponse<GetAllPlayerTeamResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error(`Error fetching player teams for team ${teamId}:`, error);
-      throw error;
-    }
-  }
-
-  async getPlayerTeamsByPlayer(playerId: string): Promise<PlayerTeam[]> {
-    try {
-      const response = await fetch(`${this.baseUrl}/player/${playerId}/teams`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await this.handleResponse<GetAllPlayerTeamResponse>(response);
-      return data.data;
-    } catch (error) {
-      console.error(`Error fetching player teams for player ${playerId}:`, error);
-      throw error;
-    }
-  }
+interface PlayerTeamService {
+  getAllPlayerTeams: () => Promise<PlayerTeam[]>;
+  getPlayerTeamById: (_id: string) => Promise<PlayerTeam>;
+  createPlayerTeam: (
+    _playerTeamData: CreatePlayerTeamRequest
+  ) => Promise<PlayerTeam>;
+  updatePlayerTeam: (
+    _id: string,
+    _playerTeamData: UpdatePlayerTeamRequest
+  ) => Promise<PlayerTeam>;
+  deletePlayerTeam: (_id: string) => Promise<void>;
+  getPlayerTeamsByTeam: (_teamId: string) => Promise<PlayerTeam[]>;
+  getPlayerTeamsByPlayer: (_playerId: string) => Promise<PlayerTeam[]>;
 }
 
-export const playerTeamService = PlayerTeamService.getInstance();
+const API_BASE_URL: string =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+const BASE_URL: string = `${API_BASE_URL}/players_team`;
+
+// Helper function to handle API responses
+const handleResponse = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    const errorData: unknown = await response.json();
+    throw new Error(
+      (errorData as { message?: string })?.message ||
+        `HTTP error! status: ${response.status}`
+    );
+  }
+  return (await response.json()) as Promise<T>;
+};
+
+// Get all player teams
+export const getAllPlayerTeams = async (): Promise<PlayerTeam[]> => {
+  try {
+    const response: Response = await fetch(`${BASE_URL}/`, {
+      method: 'GET' as const,
+      headers: {
+        'Content-Type': 'application/json'
+      } as const
+    });
+
+    const data: ApiResponse<PlayerTeam[]> =
+      await handleResponse<ApiResponse<PlayerTeam[]>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error('Error fetching player teams:', error);
+    throw error;
+  }
+};
+
+// Get player team by ID
+export const getPlayerTeamById = async (id: string): Promise<PlayerTeam> => {
+  try {
+    const response: Response = await fetch(`${BASE_URL}/${id}`, {
+      method: 'GET' as const,
+      headers: {
+        'Content-Type': 'application/json'
+      } as const
+    });
+
+    const data: ApiResponse<PlayerTeam> =
+      await handleResponse<ApiResponse<PlayerTeam>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error(`Error fetching player team with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Create new player team relationship
+export const createPlayerTeam = async (
+  playerTeamData: CreatePlayerTeamRequest
+): Promise<PlayerTeam> => {
+  try {
+    const response: Response = await fetch(`${BASE_URL}/`, {
+      method: 'POST' as const,
+      headers: {
+        'Content-Type': 'application/json'
+      } as const,
+      body: JSON.stringify(playerTeamData)
+    });
+
+    const data: ApiResponse<PlayerTeam> =
+      await handleResponse<ApiResponse<PlayerTeam>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error('Error creating player team:', error);
+    throw error;
+  }
+};
+
+// Update player team relationship
+export const updatePlayerTeam = async (
+  id: string,
+  playerTeamData: UpdatePlayerTeamRequest
+): Promise<PlayerTeam> => {
+  try {
+    const response: Response = await fetch(`${BASE_URL}/${id}`, {
+      method: 'PUT' as const,
+      headers: {
+        'Content-Type': 'application/json'
+      } as const,
+      body: JSON.stringify(playerTeamData)
+    });
+
+    const data: ApiResponse<PlayerTeam> =
+      await handleResponse<ApiResponse<PlayerTeam>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error(`Error updating player team with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Delete player team relationship
+export const deletePlayerTeam = async (id: string): Promise<void> => {
+  try {
+    const response: Response = await fetch(`${BASE_URL}/${id}`, {
+      method: 'DELETE' as const,
+      headers: {
+        'Content-Type': 'application/json'
+      } as const
+    });
+
+    await handleResponse<ApiResponse<void>>(response);
+  } catch (error: unknown) {
+    console.error(`Error deleting player team with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+// Get player teams by team ID
+export const getPlayerTeamsByTeam = async (
+  teamId: string
+): Promise<PlayerTeam[]> => {
+  try {
+    const response: Response = await fetch(
+      `${BASE_URL}/team/${teamId}/players`,
+      {
+        method: 'GET' as const,
+        headers: {
+          'Content-Type': 'application/json'
+        } as const
+      }
+    );
+
+    const data: ApiResponse<PlayerTeam[]> =
+      await handleResponse<ApiResponse<PlayerTeam[]>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error(`Error fetching player teams for team ${teamId}:`, error);
+    throw error;
+  }
+};
+
+// Get player teams by player ID
+export const getPlayerTeamsByPlayer = async (
+  playerId: string
+): Promise<PlayerTeam[]> => {
+  try {
+    const response: Response = await fetch(
+      `${BASE_URL}/player/${playerId}/teams`,
+      {
+        method: 'GET' as const,
+        headers: {
+          'Content-Type': 'application/json'
+        } as const
+      }
+    );
+
+    const data: ApiResponse<PlayerTeam[]> =
+      await handleResponse<ApiResponse<PlayerTeam[]>>(response);
+    return data.data;
+  } catch (error: unknown) {
+    console.error(`Error fetching player teams for player ${playerId}:`, error);
+    throw error;
+  }
+};
+
+export const playerTeamService: PlayerTeamService = {
+  getAllPlayerTeams,
+  getPlayerTeamById,
+  createPlayerTeam,
+  updatePlayerTeam,
+  deletePlayerTeam,
+  getPlayerTeamsByTeam,
+  getPlayerTeamsByPlayer
+} as const;

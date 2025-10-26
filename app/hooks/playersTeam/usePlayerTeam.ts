@@ -26,7 +26,8 @@ export const usePlayerTeam = (): UsePlayerTeamReturn => {
       const data = await playerTeamService.getAllPlayerTeams();
       setPlayerTeams(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch player teams';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to fetch player teams';
       setError(errorMessage);
       console.error('Error fetching player teams:', err);
     } finally {

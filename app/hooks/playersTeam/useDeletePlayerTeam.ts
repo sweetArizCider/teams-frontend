@@ -20,7 +20,8 @@ export const useDeletePlayerTeam = (): UseDeletePlayerTeamReturn => {
       await playerTeamService.deletePlayerTeam(id);
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete player team';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to delete player team';
       setError(errorMessage);
       console.error('Error deleting player team:', err);
       return false;
